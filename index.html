@@ -1,0 +1,281 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stories Privado Roberta</title>
+  <!-- Fonte Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* ====== ESTILOS GERAIS ====== */
+    html,
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Tela de erro */
+    #errorScreen {
+      background: #000;
+      color: #fff;
+      font-size: 2em;
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+    }
+
+    /* Barra de progresso */
+    #progressContainer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: transparent;
+      z-index: 100;
+    }
+
+    #progress {
+      height: 100%;
+      width: 0;
+      background-color: rgba(246, 0, 209, .6);
+      transition: width .5s ease;
+    }
+
+    /* Perfil */
+    #profileInfo {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 101;
+    }
+
+    #profilePic {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    #profilePic img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #profileInfo .name {
+      font-size: 1em;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    #profileInfo .status {
+      font-size: .8em;
+      color: #fff;
+      opacity: .7;
+    }
+
+    /* Container principal */
+    .container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* Mídia */
+    video,
+    img#photo {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      object-position: center;
+      transition: filter .5s, transform .5s;
+    }
+
+    /* Overlay de término */
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(0, 0, 0, .5);
+      color: #fff;
+      font-size: 1.5em;
+      font-weight: 600;
+      line-height: 1.5;
+      text-align: center;
+      opacity: 0;
+      transition: opacity .5s;
+    }
+
+    /* Efeitos */
+    .blur {
+      filter: blur(8px);
+      transform: scale(1.1);
+    }
+
+    .show-overlay {
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Tela de erro -->
+  <div id="errorScreen">erro 404</div>
+
+  <!-- Conteúdo principal -->
+  <div id="videoContent">
+    <!-- Barra de progresso -->
+    <div id="progressContainer">
+      <div id="progress"></div>
+    </div>
+
+    <!-- Perfil -->
+    <div id="profileInfo">
+      <div id="profilePic"><img src="/https://s3.canalwpp.com/previa/ftperfil.jpg" alt="Roberta"></div>
+      <div class="name">Roberta</div>
+      <div class="status">Agora</div>
+    </div>
+
+    <div class="container">
+      <video id="video" autoplay muted>Seu navegador não suporta vídeo.</video>
+      <img id="photo" alt="Imagem do story">
+      <div class="overlay" id="overlay">Stories privado da<br>Roberta acabou…</div>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      /* ----------- MAPA DE MÍDIAS ----------- */
+      const mediaMapping = {
+        '001': { type: 'image', src: 'https://s3.canalwpp.com/previa/Previa1.jpg' },
+        '002': { type: 'video', src: 'https://s3.canalwpp.com/previa/previa2.mp4' },
+        '003': { type: 'image', src: 'https://s3.empreendimentosonfire.win/wpp/FOTO%203.jpg' },
+        '004': { type: 'image', src: 'https://s3.empreendimentosonfire.win/wpp/FOTO%204.jpg' },
+        '005': { type: 'video', src: 'https://s3.canalwpp.com/previa/amostra.mp4' },
+        '006': { type: 'video', src: 'https://s3.empreendimentosonfire.win/wpp/VIDEO%206.mp4' },
+        '007': { type: 'video', src: 'https://s3.empreendimentosonfire.win/wpp/VIDEO%207.mp4' },
+        '008': { type: 'image', src: 'https://s3.empreendimentosonfire.win/wpp/FOTO%208.jpg' },
+        '009': { type: 'video', src: 'https://s3.empreendimentosonfire.win/wpp/VIDEO%209.mp4' },
+        '010': { type: 'image', src: 'https://s3.empreendimentosonfire.win/wpp/FOTO%2010.jpg' },
+        '011': { type: 'video', src: 'https://s3.empreendimentosonfire.win/wpp/VIDEO%2011.mp4' },
+        '012': { type: 'video', src: 'https://s3.empreendimentosonfire.win/wpp/VIDEO%2012.mp4' },
+        '013': { type: 'video', src: 'https://s3.empreendimentosonfire.win/wpp/VIDEO%2013.mp4' },
+        '014': { type: 'video', src: 'https://s3.empreendimentosonfire.win/wpp/VIDEO%2014.mp4' },
+        '015': { type: 'video', src: 'https://s3.empreendimentosonfire.win/wpp/VIDEO%2015.mp4' },
+        '016': { type: 'video', src: 'https://s3.empreendimentosonfire.win/wpp/VIDEO%2016.mp4' },
+        '017': { type: 'video', src: 'https://s3.empreendimentosonfire.win/wpp/VIDEO%2017.mp4' }
+      };
+
+      /* ----------- O RESTO DO SCRIPT SE MANTÉM IGUAL ----------- */
+      const urlParams = new URLSearchParams(window.location.search);
+      const mediaId = urlParams.get('vd') ? urlParams.get('vd').trim() : null;
+
+      /* Mídias já vistas */
+      let viewedMedia = localStorage.getItem('viewedMedia');
+      try { viewedMedia = viewedMedia ? JSON.parse(viewedMedia) : []; } catch { viewedMedia = []; }
+
+      const progressContainer = document.getElementById('progressContainer');
+      const progress = document.getElementById('progress');
+      const overlay = document.getElementById('overlay');
+      const videoEl = document.getElementById('video');
+      const photoEl = document.getElementById('photo');
+
+      function markViewed(id) {
+        if (!viewedMedia.includes(id)) {
+          viewedMedia.push(id);
+          localStorage.setItem('viewedMedia', JSON.stringify(viewedMedia));
+        }
+      }
+
+      function setBlockedState(media) {
+        progressContainer.style.display = 'none';
+        overlay.classList.add('show-overlay');
+
+        if (media.type === 'video') {
+          videoEl.src = media.src;
+          videoEl.load();
+          videoEl.pause();
+          videoEl.currentTime = 0;
+          videoEl.classList.add('blur');
+        } else {
+          videoEl.style.display = 'none';
+          photoEl.src = media.src;
+          photoEl.style.display = 'block';
+          photoEl.classList.add('blur');
+        }
+      }
+
+      if (mediaId && mediaMapping[mediaId]) {
+        const media = mediaMapping[mediaId];
+
+        if (viewedMedia.includes(mediaId)) {
+          setBlockedState(media);
+
+        } else if (media.type === 'video') {
+          videoEl.src = media.src;
+          videoEl.load();
+
+          videoEl.addEventListener('timeupdate', () => {
+            progress.style.width = ((videoEl.currentTime / videoEl.duration) * 100) + '%';
+          });
+
+          videoEl.addEventListener('ended', () => {
+            videoEl.pause();
+            videoEl.classList.add('blur');
+            overlay.classList.add('show-overlay');
+            progressContainer.style.display = 'none';
+            markViewed(mediaId);
+          });
+
+        } else { /* imagem */
+          videoEl.style.display = 'none';
+          photoEl.src = media.src;
+          photoEl.style.display = 'block';
+
+          /* Reseta e anima barra de 5 s */
+          progress.style.transition = 'none';
+          progress.style.width = '0%';
+          progress.offsetWidth;              /* reflow */
+          progress.style.transition = 'width 5s linear';
+          progress.style.width = '100%';
+
+          setTimeout(() => {
+            photoEl.classList.add('blur');
+            overlay.classList.add('show-overlay');
+            progressContainer.style.display = 'none';
+            markViewed(mediaId);
+          }, 5000);
+        }
+
+      } else {
+        document.getElementById('videoContent').style.display = 'none';
+        document.getElementById('errorScreen').style.display = 'flex';
+      }
+    });
+  </script>
+</body>
+
+</html>
